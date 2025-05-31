@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kiali
+  namespace: istio-system
+  labels:
+    app: kiali
+    release: kiali
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kiali
+  namespace: istio-system
+  labels:
+    app: kiali
+    release: kiali
+data:
+  config.yaml: |
+    auth:
+      strategy: anonymous
+    deployment:
+      accessible_namespaces: ['**']
+    external_services:
+      prometheus:
+        url: http://prometheus-kube-prometheus-prometheus.monitoring:9090
+      grafana:
+        url: http://prometheus-grafana.monitoring:80
+    server:
+      port: 20001
+      web_root: /kiali
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiali
+  namespace: istio-system
+  labels:
+    app: kiali
+    release: kiali
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiali
+  template:
+    metadata:
+      name: kiali
+      labels:
+        app: kiali
+        release: kiali
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: kiali
+      containers:
+      - image: gcr.io/kiali-release/kiali:v1.45
+        imagePullPolicy: IfNotPresent
+        name: kiali
+        command:
+        - "/opt/kiali/kiali"
+        - "-config"
+        - "/kiali-configuration/config.yaml"
+        ports:
+        - name: api-port
+          containerPort: 20001
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        volumeMounts:
+        - name: kiali-configuration
+          mountPath: "/kiali-configuration"
+      volumes:
+      - name: kiali-configuration
+        configMap:
+          name: kiali
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kiali
+  namespace: istio-system
+  labels:
+    app: kiali
+    release: kiali
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 20001
+    targetPort: 20001
+  selector:
+    app: kiali 

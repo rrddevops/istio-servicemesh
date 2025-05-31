@@ -134,4 +134,8 @@ To simulate errors and test pod restart functionality:
 curl -X POST http://localhost:30001/api/simulate-error
 ```
 
-This will trigger errors that will be monitored by Istio, leading to automatic pod restart. 
+This will trigger errors that will be monitored by Istio, leading to automatic pod restart.
+
+# Enable Kubernetes in Docker Desktop settings
+# Then switch to the Docker Desktop context
+kubectl config use-context docker-desktop 
