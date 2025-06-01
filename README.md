@@ -96,8 +96,11 @@ curl -X GET http://localhost:30001/api/call-b
 
 1. Access ArgoCD UI:
 ```bash
-# Get the initial admin password
+# Get the initial admin password Linux
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# Get the initial admin password on PowerShell
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}")))
 
 # Access the UI
 kubectl port-forward svc/argocd-server -n argocd 8080:443
@@ -145,6 +148,9 @@ This will trigger errors that will be monitored by Istio, leading to automatic p
 # Then switch to the Docker Desktop context
 kubectl config use-context docker-desktop 
 
+Simulate while consumer APIs: 
+
+```bash 
 while true; do
     date
     curl -X GET http://localhost:30001/api/hello
@@ -154,8 +160,11 @@ while true; do
     sleep 2
     clear
 done
+```
 
+Simulate while consumer APIs on Error: 
 
+```bash 
 while true; do
     curl -X GET http://localhost:30001/api/hello
     sleep 2
@@ -165,3 +174,4 @@ while true; do
     sleep 2
     clear
 done
+```
