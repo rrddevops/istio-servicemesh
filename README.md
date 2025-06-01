@@ -127,6 +127,11 @@ kubectl port-forward svc/kiali -n istio-system 20001:20001
 ```
 Access at http://localhost:20001 (no authentication required)
 
+Send application ArgoCD:
+```bash
+kubectl apply -f k8s/argocd/services-application.yaml
+```
+
 ## Error Simulation and Recovery
 
 To simulate errors and test pod restart functionality:
@@ -139,3 +144,24 @@ This will trigger errors that will be monitored by Istio, leading to automatic p
 # Enable Kubernetes in Docker Desktop settings
 # Then switch to the Docker Desktop context
 kubectl config use-context docker-desktop 
+
+while true; do
+    date
+    curl -X GET http://localhost:30001/api/hello
+    sleep 2
+    date
+    curl -X GET http://localhost:30001/api/call-b
+    sleep 2
+    clear
+done
+
+
+while true; do
+    curl -X GET http://localhost:30001/api/hello
+    sleep 2
+    curl -X GET http://localhost:30001/api/call-b
+    sleep 2
+    curl -X POST http://localhost:30001/api/simulate-error
+    sleep 2
+    clear
+done
